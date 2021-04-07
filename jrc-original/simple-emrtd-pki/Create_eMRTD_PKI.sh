@@ -25,6 +25,7 @@
 ################################################################################
 ################################################################################
 
+NODES=${NODES:-}
 
 #create directory structure
 echo "Create the directory structure"
@@ -73,12 +74,12 @@ echo "-------------------------------------------------------------------------"
 echo "Creating CSCA key pair"
 echo "-------------------------------------------------------------------------"
 echo 
-openssl req -new -config ./etc/csca.conf -out ./certs/csca.csr -keyout ./csca/private/csca.key && echo "Done creating CSCA key pair" || echo "Failed creating CSCA key pair"
+openssl req $NODES -new -subj "/C=UT/O=The Authority/CN=CSCA"  -config ./etc/csca.conf -nodes -out ./certs/csca.csr -keyout ./csca/private/csca.key && echo "Done creating CSCA key pair" || echo "Failed creating CSCA key pair"
 echo 
 
 echo "Creating CSCA self-signed certificate"
 echo 
-openssl ca -selfsign -config ./etc/csca.conf -in ./certs/csca.csr -out ./certs/csca.crt -extensions csca_ext && echo "Done creating CSCA self-signed certificate" || echo "Failed creating CSCA self-signed certificate"
+yes | openssl ca -selfsign -config ./etc/csca.conf -in ./certs/csca.csr -out ./certs/csca.crt -extensions csca_ext && echo "Done creating CSCA self-signed certificate" || echo "Failed creating CSCA self-signed certificate"
 echo 
 
 ################################################################################
@@ -91,12 +92,12 @@ echo "-------------------------------------------------------------------------"
 echo "Creating DS key pair"
 echo "-------------------------------------------------------------------------"
 echo 
-openssl req -new -config ./etc/d_signer.conf -out ./certs/DSC.csr -keyout ./csca/private/DSC.key && echo "Done creating DS key pair" || echo "Failed creating DS key pair"
+openssl req  $NODES -new -subj "/C=UT/O=Issuing Authority/CN=DSC" -config ./etc/d_signer.conf -nodes -out ./certs/DSC.csr -keyout ./csca/private/DSC.key && echo "Done creating DS key pair" || echo "Failed creating DS key pair"
 echo 
 
 echo "Signing DS certificate"
 echo 
-openssl ca -config ./etc/csca.conf -in ./certs/DSC.csr -out ./certs/DSC.crt -extensions document_signer_ext -days 1830 && echo "Done creating DS certificate" || echo "Failed creating DS certificate"
+yes | openssl ca -config ./etc/csca.conf -in ./certs/DSC.csr -out ./certs/DSC.crt -extensions document_signer_ext -days 1830 && echo "Done creating DS certificate" || echo "Failed creating DS certificate"
 echo 
 
 ################################################################################
@@ -109,12 +110,12 @@ echo "-------------------------------------------------------------------------"
 echo "Creating MLS key pair"
 echo "-------------------------------------------------------------------------"
 echo 
-openssl req -new -config ./etc/ml_signer.conf -out ./certs/MLSC.csr -keyout ./csca/private/MLSC.key && echo "Done creating MLS key pair" || echo "Failed creating MLS key pair"
+openssl req $NODES -new -subj "/C=UT/O=Managing Authority/CN=ML Signer"  -config ./etc/ml_signer.conf -nodes -out ./certs/MLSC.csr -keyout ./csca/private/MLSC.key && echo "Done creating MLS key pair" || echo "Failed creating MLS key pair"
 echo 
 
 echo "Signing MLS certificate"
 echo 
-openssl ca -config ./etc/csca.conf -in ./certs/MLSC.csr -out ./certs/MLSC.crt -extensions masterlist_signer_ext -days 1830 && echo "Done creating MLS certificate" || echo "Failed creating MLS certificate"
+yes | openssl ca -config ./etc/csca.conf -in ./certs/MLSC.csr -out ./certs/MLSC.crt -extensions masterlist_signer_ext -days 1830 && echo "Done creating MLS certificate" || echo "Failed creating MLS certificate"
 echo 
 
 ################################################################################
@@ -127,7 +128,7 @@ echo "-------------------------------------------------------------------------"
 echo "Creating BS key pair"
 echo "-------------------------------------------------------------------------"
 echo 
-openssl ecparam -name prime256v1 -genkey -noout -out ./csca/private/BSC.key
+openssl ecparam -name prime256v1 -genkey -noout -nodes -out ./csca/private/BSC.key
 echo "Creating BS key pair"
 echo 
 
@@ -140,12 +141,12 @@ echo
 echo "Creating BS certificate request"
 echo "Enter a two-letter string for Country and a two-letter string for commonName"
 echo 
-openssl req -config ./etc/barcode_signer.conf -new -key ./csca/private/BSC.key -out ./certs/BSC.csr && echo "Done creating BS certificate request" || echo "Failed creating BS certificate request" 
+openssl req $NODES -config ./etc/barcode_signer.conf -subj "/C=UT/CN=BC"  -new -key ./csca/private/BSC.key -out ./certs/BSC.csr && echo "Done creating BS certificate request" || echo "Failed creating BS certificate request" 
 echo 
 
 echo "Signing BS certificate"
 echo 
-openssl ca -config ./etc/csca.conf -in ./certs/BSC.csr -out ./certs/BSC.crt -days 1095 && echo "Done signing BS certificate request" || echo "Failed signing BS certificate" 
+yes | openssl ca -config ./etc/csca.conf -in ./certs/BSC.csr -out ./certs/BSC.crt -extensions barcode_signer_ext -days 1095 && echo "Done signing BS certificate request" || echo "Failed signing BS certificate" 
 echo
 
 ################################################################################
@@ -159,7 +160,5 @@ echo "Creating CRL"
 echo "-------------------------------------------------------------------------"
 echo 
 openssl ca -config ./etc/csca.conf -gencrl -keyfile ./csca/private/csca.key -cert ./certs/csca.crt -out ./crl/crl.crl
-
-
 
 
