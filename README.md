@@ -6,7 +6,9 @@ Far from finished. And propably quite wrong.
 
 Generate a set of CSCA, ML, DSC and BSC hierachies for a couple of countries (called AA, BB, CC).
 
-And generate trust lists of these in the simplfified format of:
+## Trustlist
+
+This generates a trust lists of these in the simplfified format of:
 
 ```
 [
@@ -21,7 +23,33 @@ And generate trust lists of these in the simplfified format of:
 
 Where the KID is the first 8 bytes of the SHA256 of the certificates; and the coordinates are the X,Y (bignum, little endian) of the prime256p1.
 
-Useful files in the directory ``out'' are:
+## Out directory
+
+The out directory contains what you'd typically expect in a Member State production setup. The example is for a member state called '_AA_'; the other 5 example memberstates are called _BB_, _CC_ up to _HH_.
+
+* Signing / Issuer keys. Required to issue certicates as country '_AA_':
+	* ```BSC-AA-5.crt```
+ 	* ```BSC-AA-5.key```
+* The list any app needs to verify any countries signature (i.e. from any country AA, BB, CC, etc):
+	* ```trustlist.json```
+* The trustlists needed to build the above ```trustlist.json```; e.g. on the memberstate national distribution server:
+	* ```masterlist-AA.p7```
+	* ```masterlist-BB.p7```
+	*  ..
+	* ```masterlist-HH.p7```
+* Data needed to validate other countries their original trustlists:
+	* ```csca-AA.crt```
+	* ```csca-BB.crt```
+	*  ..
+	* ```csca-HH.crt```
+
+Of these - only ```trustlist.json``` needs to be downloaded into the verifier app.
+
+Of the above - only the ```csca-*.crt``` are sentivive; in that you need to be absolutely shure they are the _real_ ones. All trust checks derive from these.
+
+## Intermediate directory
+
+Useful files in the directory ``intermediates'' are:
 
 * trustlist.json - a JSON style formatted file of KIDs and the raw coordinates of all known/trusted signers of all countries.
 * CSCA-<country>-* Country Signer Certificate Authority Certifcate.
