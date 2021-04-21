@@ -27,7 +27,7 @@ gencountry() {
         for i in 1 2
         do
 	    openssl req -new -config ${CNFDIR}/d_signer.conf -keyout ${PRIVDIR}/DSC-$C.key -nodes -subj "/C=$C/O=$C Document Issuer /CN=Document Signer $C-$i" |\
-		openssl x509 -req -extfile ${CNFDIR}/csca.conf -CA  ${PRIVDIR}/csca-$C.crt -CAkey ${PRIVDIR}/csca-$C.key -out ${IMDIR}/DSC-$C-$i.crt -extensions masterlist_signer_ext -days 1830 -set_serial $RANDOM
+		openssl x509 -req -extfile ${CNFDIR}/csca.conf -CA  ${PRIVDIR}/csca-$C.crt -CAkey ${PRIVDIR}/csca-$C.key -out ${IMDIR}/DSC-$C-$i.crt -extensions document_signer_ext -days 1830 -set_serial $RANDOM
 	done
 
 	for i in 1 2 3 4 5
@@ -55,9 +55,7 @@ trustentry() {
 	X=$(echo $RAW | cut -c 1-64)
 	Y=$(echo $RAW | cut -c 65-128)
 	echo "/* $DN */"
-	printf "{ \"kid\": %d,", 0x$KID
-	echo "  \"coordiante\": [ \"$X\", \"$Y\" ]"
-        echo "},"
+	echo "{ \"kid\": \"$KID\", \"coord\": [ \"$X\", \"$Y\" ] },"
 }
 
 maketrustlist() {
